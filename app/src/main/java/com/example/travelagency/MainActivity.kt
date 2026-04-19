@@ -6,8 +6,8 @@ import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
@@ -20,7 +20,15 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.example.travelagency.presentation.ui.screens.booking.BookingScreen
+import com.example.travelagency.presentation.ui.screens.destinations.DestinationDetailScreen
+import com.example.travelagency.presentation.ui.screens.destinations.DestinationsScreen
+import com.example.travelagency.presentation.ui.screens.home.HomeScreen
+import com.example.travelagency.presentation.ui.screens.profile.ProfileScreen
+import com.example.travelagency.presentation.ui.screens.search.SearchScreen
+import com.example.travelagency.presentation.ui.theme.TravelAgencyTheme
 import com.example.travelagency.presentation.viewmodel.BookingViewModel
+import com.example.travelagency.presentation.viewmodel.DestinationsViewModel
 import com.example.travelagency.presentation.viewmodel.HomeViewModel
 import com.example.travelagency.presentation.viewmodel.SearchViewModel
 
@@ -28,7 +36,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            com.example.travelagency.presentation.ui.theme.TravelAgencyTheme {
+            TravelAgencyTheme {
                 TravelApp()
             }
         }
@@ -39,19 +47,19 @@ class MainActivity : ComponentActivity() {
 fun TravelApp() {
     val navController = rememberNavController()
     val homeViewModel: HomeViewModel = viewModel()
+    val destinationsViewModel: DestinationsViewModel = viewModel()
     val searchViewModel: SearchViewModel = viewModel()
     val bookingViewModel: BookingViewModel = viewModel()
 
     val bottomNavItems = listOf(
         BottomNavItem("home", "Home", Icons.Default.Home),
-        BottomNavItem("destinations", "Trips", Icons.Default.List),
+        BottomNavItem("destinations", "Trips", Icons.AutoMirrored.Filled.List),
         BottomNavItem("search", "Search", Icons.Default.Search),
         BottomNavItem("profile", "Profile", Icons.Default.Person)
     )
 
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
-
     val showBottomBar = currentRoute in listOf("home", "destinations", "search", "profile")
 
     Scaffold(
@@ -83,25 +91,38 @@ fun TravelApp() {
             modifier = Modifier.padding(paddingValues)
         ) {
             composable("home") {
-                com.example.travelagency.presentation.ui.screens.home.HomeScreen(
+                HomeScreen(
                     viewModel = homeViewModel,
-                    onDestinationClick = { id -> navController.navigate("detail/$id") },
-                    onSeeAllClick = { navController.navigate("destinations") }
+                    onDestinationClick = { id, name ->
+                        navController.navigate("detail/$id/$name")
+                    },
+                    onSeeAllClick = {
+                        navController.navigate("destinations")
+                    }
                 )
             }
+
             composable("destinations") {
-                com.example.travelagency.presentation.ui.screens.destinations.DestinationsScreen(
-                    viewModel = homeViewModel,
-                    onDestinationClick = { id -> navController.navigate("detail/$id") }
+                DestinationsScreen(
+                    viewModel = destinationsViewModel,
+                    onDestinationClick = { id, name ->
+                        navController.navigate("detail/$id/$name")
+                    }
                 )
             }
+
             composable(
-                route = "detail/{destinationId}",
-                arguments = listOf(navArgument("destinationId") { type = NavType.IntType })
+                route = "detail/{destinationId}/{destinationName}",
+                arguments = listOf(
+                    navArgument("destinationId") { type = NavType.IntType },
+                    navArgument("destinationName") { type = NavType.StringType }
+                )
             ) { backStackEntry ->
                 val id = backStackEntry.arguments?.getInt("destinationId") ?: 1
-                com.example.travelagency.presentation.ui.screens.destinations.DestinationDetailScreen(
+                val name = backStackEntry.arguments?.getString("destinationName") ?: ""
+                DestinationDetailScreen(
                     destinationId = id,
+                    destinationName = name,
                     onBookClick = { destId ->
                         bookingViewModel.setDestination(destId)
                         navController.navigate("booking")
@@ -109,8 +130,9 @@ fun TravelApp() {
                     onBack = { navController.popBackStack() }
                 )
             }
+
             composable("booking") {
-                com.example.travelagency.presentation.ui.screens.booking.BookingScreen(
+                BookingScreen(
                     viewModel = bookingViewModel,
                     onBack = { navController.popBackStack() },
                     onSuccess = {
@@ -120,17 +142,25 @@ fun TravelApp() {
                     }
                 )
             }
+
             composable("search") {
-                com.example.travelagency.presentation.ui.screens.search.SearchScreen(
+                SearchScreen(
                     viewModel = searchViewModel,
-                    onDestinationClick = { id -> navController.navigate("detail/$id") }
+                    onDestinationClick = { id, name ->
+                        navController.navigate("detail/$id/$name")
+                    }
                 )
             }
+
             composable("profile") {
-                com.example.travelagency.presentation.ui.screens.profile.ProfileScreen()
+                ProfileScreen()
             }
         }
     }
 }
 
-data class BottomNavItem(val route: String, val label: String, val icon: androidx.compose.ui.graphics.vector.ImageVector)
+data class BottomNavItem(
+    val route: String,
+    val label: String,
+    val icon: androidx.compose.ui.graphics.vector.ImageVector
+)
