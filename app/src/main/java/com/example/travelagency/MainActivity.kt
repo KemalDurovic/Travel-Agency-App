@@ -26,7 +26,7 @@ import com.example.travelagency.presentation.ui.screens.destinations.Destination
 import com.example.travelagency.presentation.ui.screens.home.HomeScreen
 import com.example.travelagency.presentation.ui.screens.profile.ProfileScreen
 import com.example.travelagency.presentation.ui.screens.search.SearchScreen
-import com.example.travelagency.presentation.ui.theme.TravelAgencyTheme
+import com.example.travelagency.presentation.theme.TravelAgencyTheme
 import com.example.travelagency.presentation.viewmodel.BookingViewModel
 import com.example.travelagency.presentation.viewmodel.DestinationsViewModel
 import com.example.travelagency.presentation.viewmodel.HomeViewModel

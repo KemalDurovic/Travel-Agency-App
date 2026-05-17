@@ -1,4 +1,4 @@
-package com.example.travelagency.presentation.ui.theme
+package com.example.travelagency.presentation.theme
 
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.lightColorScheme
@@ -14,7 +14,7 @@ private val LightColorScheme = lightColorScheme(
 @Composable
 fun TravelAgencyTheme(content: @Composable () -> Unit) {
     MaterialTheme(
-        colorScheme = _root_ide_package_.com.example.travelagency.presentation.ui.theme.LightColorScheme,
+        colorScheme = LightColorScheme,
         content = content
     )
 }

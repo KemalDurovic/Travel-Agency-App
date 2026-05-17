@@ -1,6 +1,9 @@
 package com.example.travelagency.presentation.viewmodel
 
-import androidx.lifecycle.ViewModel
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.viewModelScope
+import com.example.travelagency.TravelApplication
 import com.example.travelagency.model.popularCities
 import com.example.travelagency.model.sampleDestinations
 import com.example.travelagency.presentation.ui.screens.home.util.HomeUiState
@@ -8,8 +11,11 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
 
-class HomeViewModel : ViewModel() {
+class HomeViewModel(application: Application) : AndroidViewModel(application) {
+
+    private val repository = (application as TravelApplication).container.repository
 
     private val _uiState = MutableStateFlow(HomeUiState())
     val uiState: StateFlow<HomeUiState> = _uiState.asStateFlow()
@@ -28,10 +34,19 @@ class HomeViewModel : ViewModel() {
         get() = _uiState.value.searchQuery.isNotBlank()
 
     init {
-        _uiState.value = HomeUiState(
-            featuredDestinations = sampleDestinations.take(4),
-            popularCities = popularCities
-        )
+        loadDestinations()
+    }
+
+    private fun loadDestinations() {
+        viewModelScope.launch {
+            repository.seedDestinationsIfEmpty()
+            repository.getAllDestinations().collect { destinations ->
+                _uiState.value = HomeUiState(
+                    featuredDestinations = destinations.take(4),
+                    popularCities = popularCities
+                )
+            }
+        }
     }
 
     fun onSearchQueryChange(query: String) {
