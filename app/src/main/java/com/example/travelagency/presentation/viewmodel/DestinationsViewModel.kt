@@ -1,14 +1,19 @@
 package com.example.travelagency.presentation.viewmodel
 
-import androidx.lifecycle.ViewModel
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.viewModelScope
+import com.example.travelagency.TravelApplication
 import com.example.travelagency.model.Destination
-import com.example.travelagency.model.sampleDestinations
 import com.example.travelagency.presentation.ui.screens.destinations.util.DestinationsUiState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
 
-class DestinationsViewModel : ViewModel() {
+class DestinationsViewModel(application: Application) : AndroidViewModel(application) {
+
+    private val repository = (application as TravelApplication).container.repository
 
     private val _uiState = MutableStateFlow(DestinationsUiState())
     val uiState: StateFlow<DestinationsUiState> = _uiState.asStateFlow()
@@ -29,10 +34,18 @@ class DestinationsViewModel : ViewModel() {
         get() = _uiState.value.selectedCategory != "All" || _uiState.value.searchQuery.isNotBlank()
 
     init {
-        _uiState.value = _uiState.value.copy(
-            allDestinations = sampleDestinations,
-            filteredDestinations = sampleDestinations
-        )
+        loadDestinations()
+    }
+
+    private fun loadDestinations() {
+        viewModelScope.launch {
+            repository.getAllDestinations().collect { destinations ->
+                _uiState.value = _uiState.value.copy(
+                    allDestinations = destinations,
+                    filteredDestinations = destinations
+                )
+            }
+        }
     }
 
     fun onCategorySelected(category: String) {
@@ -52,7 +65,7 @@ class DestinationsViewModel : ViewModel() {
     }
 
     private fun applyFilters(category: String, query: String): List<Destination> {
-        return sampleDestinations.filter { dest ->
+        return _uiState.value.allDestinations.filter { dest ->
             val matchesCategory = category == "All" || dest.category == category
             val matchesQuery = query.isBlank() ||
                     dest.name.contains(query, ignoreCase = true) ||
