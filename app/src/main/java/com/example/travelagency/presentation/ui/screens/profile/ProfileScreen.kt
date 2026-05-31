@@ -9,8 +9,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.example.travelagency.presentation.ui.screens.profile.components.ProfileAvatar
-import com.example.travelagency.presentation.ui.screens.profile.components.ProfileInfoRow
+import com.example.travelagency.StatCard
 
 @Composable
 fun ProfileScreen() {
@@ -99,15 +98,15 @@ fun ProfileScreen() {
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceEvenly
                 ) {
-                    _root_ide_package_.com.example.travelagency.presentation.ui.screens.profile.StatCard(
+                    StatCard(
                         value = "3",
                         label = "Countries"
                     )
-                    _root_ide_package_.com.example.travelagency.presentation.ui.screens.profile.StatCard(
+                    StatCard(
                         value = "14",
                         label = "Days Traveled"
                     )
-                    _root_ide_package_.com.example.travelagency.presentation.ui.screens.profile.StatCard(
+                    StatCard(
                         value = "2",
                         label = "Upcoming"
                     )
